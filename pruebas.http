@@ -1,0 +1,67 @@
+### =========================================================================
+### 📑 BATERÍA DE PRUEBAS COMPLETA — MICROSERVICIO pc-autorent-jcoyh
+### =========================================================================
+
+# @name 1_CrearVehiculo
+POST http://localhost:8081/api/autos
+Content-Type: application/json
+
+{
+  "placa": "JCH-777",
+  "marca": "Mazda",
+  "modelo": "CX-30",
+  "anio": 2026,
+  "precioPorDia": 180000.0,
+  "deposito": 500000.0,
+  "kilometraje": 12500
+}
+
+###
+
+# @name 2_CrearClienteExitoso
+POST http://localhost:8081/api/clientes
+Content-Type: application/json
+
+{
+  "nombre": "Carlos Pérez",
+  "tipoDocumento": "CC",
+  "documento": 1020304050,
+  "celular": "3001234567",
+  "email": "carlos@email.com"
+}
+
+###
+
+# @name 3_CrearClienteDuplicado_Error
+POST http://localhost:8081/api/clientes
+Content-Type: application/json
+
+{
+  "nombre": "Juan López",
+  "tipoDocumento": "CC",
+  "documento": 1020304050,
+  "celular": "3119876543",
+  "email": "juan@email.com"
+}
+
+###
+
+# @name 4_CrearAlquilerExitoso
+POST http://localhost:8081/api/alquileres
+Content-Type: application/json
+
+{
+  "clienteId": 1,
+  "autoId": 1,
+  "cantidadDias": 5
+}
+
+###
+
+# @name 5_FinalizarAlquilerExitoso
+PUT http://localhost:8081/api/alquileres/1/finalizar
+Content-Type: application/json
+
+{
+  "kilometrajeFinal": 12850
+}

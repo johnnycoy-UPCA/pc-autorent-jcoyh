@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+    <!-- Configuraciones base de Spring Boot para el proyecto-->
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>4.1.2</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+    <!-- Información del proyecto -->
+	<groupId>co.edu.clase</groupId>
+	<artifactId>pc-autorent-jcoyh</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+    <name>pc-autorent-jcoyh</name>
+    <description>Sistema AutoRent con Arquitectura Hexagonal</description>
+	<url/>
+	<licenses>
+		<license/>
+	</licenses>
+	<developers>
+		<developer/>
+	</developers>
+	<scm>
+		<connection/>
+		<developerConnection/>
+		<tag/>
+		<url/>
+	</scm>
+	<properties>
+		<java.version>17</java.version>
+		<maven.test.skip>true</maven.test.skip>
+	</properties>
+
+	<dependencies>
+        <!-- Adaptador Web: Permite crear las rutas de la API REST e inyectar el servidor web embebido -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+        <!-- Test: No lo tengo del todo claro, el profesor la dejó, el INITIALZR la incluye -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+<!-- AÑADIDO PARA PODER EMPLEAR H2 Y HACER CONSULTAS POR JPA -->                
+
+        <!-- Persistencia de Datos: Activa JPA y Hibernate para conectarse a la base de datos -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+
+        <!-- Base de datos H2: Habilitar -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-h2console</artifactId>
+		</dependency>
+
+
+<!-- ============================================ -->                                
+
+	</dependencies>
+
+	<build>
+		<plugins>
+            <!-- Plugin de Maven para empaquetar y ejecutar Spring Boot de forma nativa -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
+    <title>🚗 AutoRent - Panel Operativo v6</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --primary: #2563eb;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --info: #0284c7;
+            --warning: #ea580c;
+            --border: #cbd5e1;
+            --dark-console: #0f172a;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        .container { max-width: 100%; margin: 0 auto; }
+        header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border);
+        }
+        header h1 { margin: 0; color: #1e3a8a; font-size: 1.8em; }
+        header p { margin: 3px 0 0 0; color: #475569; font-size: 0.9em; }
+        
+        .workspace-layout {
+            display: grid;
+            grid-template-columns: minmax(400px, 600px) minmax(500px, 1fr) 380px; /*460px 1fr 380px;*/
+            gap: 15px;
+            align-items: start;
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .tabs-header {
+            display: flex;
+            gap: 5px;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 15px;
+            background-color: #f1f5f9;
+            padding: 4px 4px 0 4px;
+            border-radius: 6px 6px 0 0;
+        }
+        .tab-button {
+            flex: 1;
+            padding: 8px;
+            background: none;
+            border: none;
+            font-weight: bold;
+            font-size: 0.85em;
+            cursor: pointer;
+            color: #64748b;
+            border-radius: 4px 4px 0 0;
+            transition: all 0.2s;
+        }
+        .tab-button.active {
+            background-color: var(--card-bg);
+            color: var(--primary);
+            border: 1px solid var(--border);
+            border-bottom: 2px solid var(--card-bg);
+            margin-bottom: -2px;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .form-group { margin-bottom: 10px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 3px;
+            font-weight: 600;
+            font-size: 0.8em;
+            color: #334155;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 6px 8px;
+            box-sizing: border-box;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+        .form-row-horizontal {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            margin-bottom: 8px;
+        }
+        .form-row-horizontal .form-group { margin-bottom: 0; flex: 1; }
+        .divider { border-top: 1px dashed var(--border); margin: 12px 0; }
+        h3 { margin: 5px 0 8px 0; font-size: 0.95em; color: #1e293b; border-left: 3px solid var(--info); padding-left: 6px; }
+
+        button {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.85em;
+        }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-success { background-color: var(--success); color: white; }
+        .btn-danger { background-color: var(--danger); color: white; }
+        .btn-info { background-color: var(--info); color: white; }
+        .btn-warning { background-color: var(--warning); color: white; }
+
+        .query-panel { 
+            height: calc(100vh - 100px); 
+        }
+        .table-container {
+            flex: 1;
+            background-color: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        .data-item {
+            background-color: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            position: relative;
+        }
+        .status-badge-line {
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            bottom: 0; 
+            width: 5px; 
+            border-radius: 6px 0 0 6px;
+        }
+        .console-panel { 
+            height: auto; /*calc(100vh - 100px); */
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            box-sizing: border-box;
+        }
+        .console-box {
+            /* flex: 1; */
+            background-color: var(--dark-console);
+            color: #38bdf8;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 10px;
+            border-radius: 6px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 0.75em;
+            font-weight: 300;
+            box-sizing: border-box;
+            height: calc(100vh - 380px);
+            /* max-height: calc(100vh - 380px);
+            min-height: 400px; */
+        }
+        .divider-taller {
+            border-top: 3px double var(--border);
+            margin: 18px 0;
+            position: relative;
+        }
+        .checkbox-container {
+            display: flex; align-items: center; gap: 6px; margin-top: 4px;
+            background-color: #fff7ed; padding: 6px; border-radius: 4px; border: 1px dashed var(--warning);
+        }
+        .checkbox-container input { width: auto; }
+        .checkbox-container label { font-size: 0.75em; font-weight: bold; color: var(--warning); display: inline; }
+        .input-baja-requerido {
+            background-color: #fee2e2 !important;
+            border: 1px solid #fca5a5 !important;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="workspace-layout">
+        
+        <!-- COLUMNA 1: OPERACIONES CON INTERRUPTOR DE PESTAÑAS -->
+        <div class="card" style="min-height: 620px;">
+            <div class="tabs-header">
+                <button class="tab-button active" onclick="switchTab('tab-content-1')">👥 Clientes y Vehículos</button>
+                <button class="tab-button" onclick="switchTab('tab-content-2')">📑 Alquileres y Taller</button>
+            </div>
+
+            <!-- PESTAÑA 1: ALTAS Y BAJAS DE ENTIDADES BASE -->
+            <div id="tab-content-1" class="tab-content active">
+                <h3>👥 Gestión de Clientes</h3>
+                <div class="form-group"><label>Nombre Completo:</label><input type="text" id="clienteNombre" placeholder="Carlos Pérez"></div>
+                <div class="form-row-horizontal">
+                    <div class="form-group" style="flex: 2;"><label>Tipo Doc:</label>
+                        <select id="clienteTipoDoc">
+                            <option value="CC">CC</option>
+                            <option value="CE">CE</option>
+                            <option value="PA">PA</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 4;"><label>Documento (Baja):</label><input class="input-baja-requerido" type="number" id="clienteDoc" placeholder="1234567890"></div>
+                </div>
+                <div class="form-row-horizontal">
+                    <div class="form-group"><label>Teléfono:</label><input type="text" id="clienteTel" placeholder="3001234567"></div>
+                    <div class="form-group"><label>Email:</label><input type="email" id="clienteEmail" placeholder="carlos@email.com"></div>
+                </div>
+                <div class="form-row-horizontal" style="margin-top: 5px;">
+                    <button class="btn-primary" id="btnRegistrarCliente" onclick="registrarCliente()" disabled>Registrar Cliente</button>
+                    <button class="btn-danger" id="btnBajaCliente" onclick="darBajaCliente()" style="flex: 0 0 110px;" disabled>Dar de Baja</button>
+                </div>
+
+                <div class="divider"></div>
+
+                <h3>🚗 Gestión de Vehículos</h3>
+                <div class="form-row-horizontal">
+                    <div class="form-group" style="flex: 2;"><label>Placa (Baja):</label><input class="input-baja-requerido" type="text" id="autoPlaca" placeholder="ABC-123"></div>
+                    <div class="form-group" style="flex: 3;"><label>Marca:</label><input type="text" id="autoMarca" placeholder="Mazda"></div>
+                    <div class="form-group" style="flex: 3;"><label>Modelo:</label><input type="text" id="autoModelo" placeholder="CX-30"></div>
+                </div>
+                <div class="form-row-horizontal">
+                    <div class="form-group"><label>Año:</label><input type="number" id="autoAnio" placeholder="2026"></div>
+                    <div class="form-group"><label>Costo/Día ($):</label><input type="number" id="autoPrecio" placeholder="100000"></div>
+                    <div class="form-group"><label>Depósito ($):</label><input type="number" id="autoDeposito" placeholder="100000"></div>
+                </div>
+                <div class="form-group"><label>Kilometraje Actual:</label><input class="input-baja-requerido" type="number" id="autoKilometraje" placeholder="0000"></div>
+                <div class="form-row-horizontal">
+                    <button class="btn-primary" id="btnRegistrarAuto" onclick="registrarAuto()" disabled>Registrar Vehículo</button>
+                    <button class="btn-danger" id="btnBajaAuto" onclick="darBajaAuto()" style="flex: 0 0 110px;" disabled>Dar de Baja</button>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 2: CONTRATOS, CANCELACIÓN Y MANTENIMIENTO -->
+            <div id="tab-content-2" class="tab-content">
+                <h3>📋 Apertura de Reservas (POST)</h3>
+                <div class="form-row-horizontal">
+                    <div class="form-group"><label>Cédula Cliente:</label><input type="number" id="alqClienteDoc" placeholder="1234567890"></div>
+                    <div class="form-group"><label>Placa Auto:</label><input type="text" id="alqAutoPlaca" placeholder="ABC-123"></div>
+                </div>
+                <div class="form-row-horizontal">
+                    <div class="form-group"><label>Fecha Inicio:</label><input type="date" id="alqFechaInicio"></div>
+                    <div class="form-group" style="flex: 0 0 90px;"><label>Días:</label><input type="number" id="alqDias" placeholder="0"></div>
+                </div>
+                <button class="btn-success" onclick="crearAlquiler()">Registrar Reserva</button>
+
+                <div class="divider"></div>
+
+                <h3>⚡ Control de Ciclo de Vida y Cierre Flexible</h3>
+                <div class="form-row-horizontal">
+                    <div class="form-group" style="flex: 2;"><label>ID Contrato:</label><input type="number" id="finAlqId" placeholder="0"></div>
+                    <div class="form-group" style="flex: 3;"><label>Kilometraje Odómetro:</label><input type="number" id="finKilometraje" placeholder="0000"></div>
+                </div>
+                <div class="form-group"><label>Fecha Retorno Real (Opcional - Reliquidación):</label><input type="date" id="finFechaReal"></div>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="chkRollover">
+                    <label for="chkRollover">⚠️ El odómetro físico dio la vuelta (Reinicio a cero)</label>
+                </div>
+                <div class="form-row-horizontal" style="margin-top: 8px;">
+                    <button class="btn-info" onclick="activarReserva()">Entregar</button>
+                    <button class="btn-danger" onclick="finalizarAlquiler()">Finalizar</button>
+                    <button class="btn-warning" onclick="cancelarAlquiler()" style="background-color: #64748b;">Cancelar</button>
+                </div>
+
+                <div class="divider-taller"></div>
+
+                <h3>🛠️ Control de Taller Mecánico</h3>
+                <div class="form-row-horizontal">
+                    <div class="form-group"><label>Placa Vehículo:</label><input type="text" id="maintPlaca" placeholder="ABC-123"></div>
+                    <div class="form-group"><label>Kilometraje Acumulado:</label><input type="number" id="maintKm" placeholder="0000"></div>
+                </div>
+                
+                <div class="checkbox-container" style="margin-bottom: 8px;">
+                    <input type="checkbox" id="chkRolloverMaint">
+                    <label for="chkRolloverMaint">⚠️ El odómetro físico dio la vuelta (Reinicio a cero)</label>
+                </div>
+                <div class="form-row-horizontal">
+                    <button class="btn-info" onclick="alterarMantenimiento(true)">Ingresar</button>
+                    <button class="btn-success" onclick="alterarMantenimiento(false)">Liberar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMNA 2: MONITOR DE BASE DE DATOS H2 -->
+        <div class="card query-panel">
+            <h2>🔍 Vista del Catálogo H2</h2>
+            <div class="form-group">
+                <label>Seleccione Catálogo Relacional:</label>
+                <select id="tablaSelector" onchange="ejecutarConsulta(); actualizarInterfazBuscador();">
+                    <option value="alquileres">📑 Contratos Celebrados (ALQUILERES)</option>
+                    <option value="autos">🚗 Catálogo de Vehículos (AUTOS)</option>
+                    <option value="clientes">👥 Registro de Clientes (CLIENTES)</option>
+                </select>
+            </div>
+            <div class="table-container" id="contenedorTabla">Descargando datos del motor relacional...</div>
+        </div>
+
+        <!-- COLUMNA 3: BÚSQUEDAS Y TRÁFICO JSON -->
+        <div class="console-panel">
+            <div class="card" style="padding: 12px; gap: 8px; height: 225px; min-height: 225px; box-sizing: border-box;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h2 style="margin:0; font-size:1.1em;">⚡ Filtros de Auditoría</h2>
+                    <span id="contadorRegistros" style="background-color:#e0f2fe; color:var(--primary); padding:2px 8px; border-radius:20px; font-size:0.75em; font-weight:bold;">0</span>
+                </div>
+                <div class="form-row-horizontal">
+                    <div class="form-group" style="flex: 2;"><label>Filtrar ID:</label><input type="number" id="inputFiltroId" oninput="filtrarDatosLocales()" placeholder="ID..."></div>
+                    <div class="form-group" style="flex: 4;"><label>Filtrar Estado:</label><select id="selectorEstadoFiltro" onchange="filtrarDatosLocales()"></select></div>
+                </div>
+                <div class="form-group" style="margin:0;"><input type="text" id="inputFiltroUniversal" oninput="filtrarDatosLocales()" placeholder="Buscar por coincidencia de caracteres..."></div>
+
+                <div id="contenedorFiltroFechas" style="display: none; flex-direction: row; gap: 8px; margin-top: 6px; background-color: #f8fafc; padding: 4px; border-radius: 4px; border: 1px solid var(--border);">
+                    <div class="form-group" style="margin: 0; background-color: #f0fdf4; flex: 1;">
+                        <label>📅 Fecha de Reserva:</label>
+                        <input type="date" id="filtroFechaReservaUnica" onchange="filtrarDatosLocales()">
+                    </div>
+                    <div class="form-group" style="margin: 0; background-color: #f0f9ff; flex: 1;">
+                        <label>⏳ Fecha de Alquiler:</label>
+                        <input type="date" id="filtroFechaEnPeriodo" onchange="filtrarDatosLocales()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="flex: 1; padding: 12px; margin-top: 20px;">
+                <h2 style="margin: 0 0 8px 0; font-size: 1.1em;">🖥️ Consola HTTP JSON</h2>
+                <div class="console-box" id="salidaConsola">Esperando datos de red...</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const HOST = "http://localhost:8081/api";
+    let datosCrudosLocales = [];
+    let cacheAutos = [];
+    let cacheClientes = [];
+
+    // Formato de miles
+    function formatearMiles(valor) {
+        if (valor === null || valor === undefined) return "N/D";
+        return Number(valor).toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+    // Intercambio asincrónico de pestañas
+    function switchTab(contentId) {
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        event.currentTarget.classList.add('active');
+        document.getElementById(contentId).classList.add('active');
+    }
+
+    // Placas (3 Letras - 3 Números)
+    function aplicarMascaraPlaca(el) {
+        el.addEventListener("input", function (e) {
+            let val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+            if (val.length > 3) val = val.substring(0,3) + "-" + val.substring(3,6).replace(/[^0-9]/g, "");
+            e.target.value = val.substring(0,7);
+        });
+    }
+
+    function precargarColecciones() {
+        fetch(`${HOST}/autos`).then(r => r.json()).then(d => { cacheAutos = d; });
+        fetch(`${HOST}/clientes`).then(r => r.json()).then(d => { cacheClientes = d; });
+    }
+
+    function registrarCliente() {
+        const payload = {
+            nombre: document.getElementById("clienteNombre").value.trim(),
+            tipoDocumento: document.getElementById("clienteTipoDoc").value,
+            documento: parseInt(document.getElementById("clienteDoc").value),
+            telefono: document.getElementById("clienteTel").value.trim(),
+            email: document.getElementById("clienteEmail").value.trim()
+        };
+        fetch(`${HOST}/clientes`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+        .then(res => res.json().then(data => pintarConsola(res.status, data)));
+    }
+
+    function darBajaCliente() {
+        const doc = parseInt(document.getElementById("clienteDoc").value);
+        fetch(`${HOST}/clientes`).then(r => r.json()).then(list => {
+            const found = list.find(c => c.documento === doc && c.estado !== 'INACTIVO');
+            if (!found) return alert("Cliente no registrado o ya inactivo.");
+            if (confirm(`¿Desactivar al cliente ${found.nombre}?`)) {
+                fetch(`${HOST}/clientes/${found.id}/desactivar`, { method: "PUT" }).then(res => res.json().then(data => pintarConsola(res.status, data)));
+            }
+        });
+    }
+
+    function registrarAuto() {
+        const payload = {
+            placa: document.getElementById("autoPlaca").value.trim(),
+            marca: document.getElementById("autoMarca").value.trim(),
+            modelo: document.getElementById("autoModelo").value.trim(),
+            anio: parseInt(document.getElementById("autoAnio").value),
+            precioPorDia: parseFloat(document.getElementById("autoPrecio").value),
+            deposito: parseFloat(document.getElementById("autoDeposito").value),
+            kilometraje: parseInt(document.getElementById("autoKilometraje").value)
+        };
+        fetch(`${HOST}/autos`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+        .then(res => res.json().then(data => pintarConsola(res.status, data)));
+    }
+
+    function darBajaAuto() {
+        const placa = document.getElementById("autoPlaca").value.trim().toUpperCase();
+        fetch(`${HOST}/autos`).then(r => r.json()).then(list => {
+            const found = list.find(a => a.placa.toUpperCase() === placa && a.estado !== 'INACTIVO');
+            if (!found) return alert("Vehículo no encontrado o ya inactivo.");
+            if (confirm(`¿Dar de baja definitiva al vehículo placa ${found.placa}?`)) {
+                fetch(`${HOST}/autos/${found.id}/desactivar`, { method: "PUT" }).then(res => res.json().then(data => pintarConsola(res.status, data)));
+            }
+        });
+    }
+
+    function crearAlquiler() {
+        const doc = parseInt(document.getElementById("alqClienteDoc").value);
+        const placa = document.getElementById("alqAutoPlaca").value.trim().toUpperCase();
+        
+        const c = cacheClientes.find(item => item.documento === doc);
+        const a = cacheAutos.find(item => item.placa.toUpperCase() === placa);
+        
+        if (!c || !a) {
+            return alert("Error: Verifique que el documento del cliente y la placa del auto estén registrados.");
+        }
+
+        const payload = {
+            clienteId: c.id,
+            autoId: a.id,
+            fechaInicio: document.getElementById("alqFechaInicio").value,
+            cantidadDias: parseInt(document.getElementById("alqDias").value)
+        };
+
+        fetch(`${HOST}/alquileres`, { 
+            method: "POST", 
+            headers: { "Content-Type": "application/json" }, 
+            body: JSON.stringify(payload) 
+        })
+        .then(res => res.json().then(data => pintarConsola(res.status, data)));
+    }
+
+    function activarReserva() {
+        const id = document.getElementById("finAlqId").value;
+        if (!id) return alert("Por favor ingrese el ID del contrato.");
+
+        // Se remueve el payload de kilometraje inicial ya que el backend lo infiere del Auto automáticamente
+        fetch(`${HOST}/alquileres/${id}/iniciar`, { 
+            method: "PUT",
+            headers: { "Content-Type": "application/json" }
+        })
+        .then(res => res.json().then(data => pintarConsola(res.status, data)));
+    }
+
+    function finalizarAlquiler() {
+        const id = document.getElementById("finAlqId").value;
+        let kmFinal = parseInt(document.getElementById("finKilometraje").value);
+        const isRollover = document.getElementById("chkRollover").checked;
+        const dateFlex = document.getElementById("finFechaReal").value;
+
+        fetch(`${HOST}/alquileres/${id}`).then(res => {
+            if (!res.ok) return alert("ID de contrato inexistente.");
+            res.json().then(alquiler => {
+                const kmAnterior = alquiler.kilometrajeInicial || 0;
+
+                if (isRollover) {
+                    const cantidadDigitos = String(kmAnterior).length;
+                    const limiteOdometro = Math.pow(10, cantidadDigitos) - 1; // 99999 para 5 dígitos
+                    
+                    const remanente = limiteOdometro - kmAnterior;
+                    kmFinal = remanente + 1 + kmFinal; // Ajuste neto de kilómetros reales
+                    
+                    alert(`⚡ Rollover Activado:\n• Km Anterior: ${kmAnterior}\n• Ajuste de Cierre: ${kmFinal} km.`);
+                }
+
+                const payload = { kilometrajeFinal: kmFinal, fechaFin: dateFlex };
+                fetch(`${HOST}/alquileres/${id}/finalizar`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+                .then(r => r.json().then(data => pintarConsola(r.status, data)));
+            });
+        });
+    }
+
+    function cancelarAlquiler() {
+        const id = document.getElementById("finAlqId").value;
+        if(confirm(`¿Confirmar la cancelación total del contrato #${id}?`)) {
+            fetch(`${HOST}/alquileres/${id}/cancelar`, { method: "PUT" }).then(res => res.json().then(data => pintarConsola(res.status, data)));
+        }
+    }
+
+    function alterarMantenimiento(enMaint) {
+        const payload = {
+            placa: document.getElementById("maintPlaca").value.trim(),
+            enMantenimiento: enMaint,
+            kilometraje: parseInt(document.getElementById("maintKm").value)
+        };
+        fetch(`${HOST}/autos/mantenimiento`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+        .then(res => res.json().then(data => pintarConsola(res.status, data)));
+    }
+
+    function ejecutarConsulta() {
+        const t = document.getElementById("tablaSelector").value;
+        
+        // Sincroniza para asegurar que placas y documentos no salgan vacíos
+        fetch(`${HOST}/autos`).then(r => r.json()).then(ats => {
+            cacheAutos = ats;
+            return fetch(`${HOST}/clientes`).then(r => r.json());
+        }).then(cls => {
+            cacheClientes = cls;
+            return fetch(`${HOST}/${t}`);
+        }).then(r => r.json()).then(list => {
+            datosCrudosLocales = list;
+            filtrarDatosLocales();
+        });
+    }
+
+
+    let bloqueoPorTransaccion = false; // Para evitar sobreescritura de Consola JSON
+
+    function pintarConsola(status, data) {
+        bloqueoPorTransaccion = true;
+        const consola = document.getElementById("salidaConsola");
+        consola.style.color = status >= 200 && status < 300 ? "#38bdf8" : "#f87171";
+        consola.innerText = `HTTP TRANSACTION RESPONSE - Status: ${status}\n\n${JSON.stringify(data, null, 2)}`;
+        consola.scrollTop = consola.scrollHeight;
+        
+        precargarColecciones();
+        
+        // Refrescar vista de H2
+        const t = document.getElementById("tablaSelector").value;
+        fetch(`${HOST}/${t}`).then(r => r.json()).then(list => {
+            datosCrudosLocales = list;
+            const cont = document.getElementById("contenedorTabla");
+            let html = "";
+            
+            datosCrudosLocales.forEach(item => {
+                if (t === "autos") {
+                    const color = item.estado === "DISPONIBLE" ? "var(--success)" : item.estado === "ALQUILADO" ? "var(--primary)" : "var(--warning)";
+                    html += `<div class="data-item"><div class="status-badge-line" style="background-color:${color}"></div><strong>ID: ${item.id}</strong> | Placa: <span style="color:var(--primary);font-weight:bold">${item.placa}</span><br>Vehículo: ${item.marca} ${item.modelo}<br>Estado H2: <b>${item.estado}</b> | Odom: ${formatearMiles(item.kilometraje)} km</div>`;
+                } else if (t === "clientes") {
+                    const color = item.estado === "INACTIVO" ? "var(--danger)" : "var(--success)";
+                    html += `<div class="data-item"><div class="status-badge-line" style="background-color:${color}"></div><strong>ID: ${item.id}</strong> | ${item.nombre}<br>Doc: ${item.tipoDocumento} - ${item.documento}<br>Estado: <b>${item.estado || 'ACTIVO'}</b></div>`;
+                } else if (t === "alquileres") {
+                    const color = item.estado === "PENDIENTE" ? "var(--warning)" : item.estado === "ACTIVO" ? "var(--primary)" : "var(--border)";
+                    const objetoAuto = cacheAutos.find(a => a.id === item.autoId);
+                    const objetoCliente = cacheClientes.find(c => c.id === item.clienteId);
+                    const placaTexto = objetoAuto ? objetoAuto.placa : "No encontrada";
+                    const docTexto = objetoCliente ? `${objetoCliente.tipoDocumento} - ${objetoCliente.documento}` : "No encontrado";
+                    
+                    html += `<div class="data-item"><div class="status-badge-line" style="background-color:${color}"></div><strong>Contrato ID: #${item.id}</strong> [${item.estado}]<br>🚗 Placa: ${placaTexto} (ID: ${item.autoId})<br>👥 Cliente Doc: ${docTexto} (ID: ${item.clienteId})<br>📅 Reservado: ${item.fechaReserva || 'N/D'}<br>⏳ Periodo: ${item.fechaInicio} al ${item.fechaFin}<br><b>🏁 KM Inicial:</b> ${item.kilometrajeInicial !== null ? formatearMiles(item.kilometrajeInicial) : 'N/D'} | <b>KM Final:</b> ${item.kilometrajeFinal !== null ? formatearMiles(item.kilometrajeFinal) : 'N/D'}<br>Total: <b style="color:var(--success)">$${formatearMiles(item.valorTotal)}</b> (${item.cantidadDias} días)</div>`;
+                }
+            });
+            
+            document.getElementById("contadorRegistros").innerText = `${datosCrudosLocales.length} / ${datosCrudosLocales.length}`;
+            if(html) cont.innerHTML = html;
+        });
+    }
+
+    function actualizarInterfazBuscador() {
+        const t = document.getElementById("tablaSelector").value;
+        const sel = document.getElementById("selectorEstadoFiltro");
+        const panelFechas = document.getElementById("contenedorFiltroFechas");
+        
+        bloqueoPorTransaccion = false;
+        document.getElementById("inputFiltroId").value = "";
+        document.getElementById("inputFiltroUniversal").value = "";
+        
+        if(panelFechas) {
+            panelFechas.style.display = (t === "alquileres") ? "flex" : "none";
+            document.getElementById("filtroFechaReservaUnica").value = "";
+            document.getElementById("filtroFechaEnPeriodo").value = "";
+        }
+
+        if (t === "autos") {
+            sel.innerHTML = `<option value="TODOS">🌐 Todos</option><option value="DISPONIBLE">🟢 DISPONIBLE</option><option value="ALQUILADO">⚡ ALQUILADO</option><option value="MANTENIMIENTO">🛠️ TALLER</option><option value="INACTIVO">🔴 INACTIVO</option>`;
+        } else if (t === "alquileres") {
+            sel.innerHTML = `<option value="TODOS">🌐 Todos</option><option value="PENDIENTE">📋 PENDIENTE</option><option value="ACTIVO">⚡ ACTIVO</option><option value="FINALIZADO">🔒 FINALIZADO</option><option value="CANCELADO">❌ CANCELADO</option>`;
+        } else {
+            sel.innerHTML = `<option value="TODOS">🌐 Todos</option><option value="ACTIVO">🟢 ACTIVO</option><option value="INACTIVO">🔴 INACTIVO</option>`;
+        }
+    }
+
+    function filtrarDatosLocales() {
+        const t = document.getElementById("tablaSelector").value;
+        const fId = document.getElementById("inputFiltroId").value.trim();
+        const fTxt = document.getElementById("inputFiltroUniversal").value.toLowerCase().trim();
+        const fEst = document.getElementById("selectorEstadoFiltro").value;
+        const cont = document.getElementById("contenedorTabla");
+        
+        const inputReserva = document.getElementById("filtroFechaReservaUnica");
+        const inputPeriodo = document.getElementById("filtroFechaEnPeriodo");
+
+        const fReserva = inputReserva ? inputReserva.value : "";
+        const fPeriodo = inputPeriodo ? inputPeriodo.value : "";
+
+        let res = datosCrudosLocales.filter(item => {
+            if (fEst !== "TODOS" && item.estado !== fEst) return false;
+            if (fId !== "" && item.id.toString() !== fId) return false;
+            
+            if (t === "alquileres") {
+                // Filtro 1: Fecha de Reserva
+                // const fReserva = document.getElementById("filtroFechaReservaUnica").value;
+                if (fReserva && item.fechaReserva && item.fechaReserva !== fReserva) return false;
+
+                // Filtro 2: Fecha de Alquiler en el rango
+                // const fPeriodo = document.getElementById("filtroFechaEnPeriodo").value;
+                if (fPeriodo && item.fechaInicio && item.fechaFin) {
+                    const estaEnRango = (fPeriodo >= item.fechaInicio && fPeriodo <= item.fechaFin);
+                    if (!estaEnRango) return false;
+                }
+            }
+            
+            if (!fTxt) return true;
+            if (t === "autos") return item.placa.toLowerCase().includes(fTxt) || item.marca.toLowerCase().includes(fTxt);
+            if (t === "clientes") return item.nombre.toLowerCase().includes(fTxt) || item.documento.toString().includes(fTxt);
+            if (t === "alquileres") return item.estado.toLowerCase().includes(fTxt) || item.id.toString() === fTxt;
+            return true;
+        });
+
+        document.getElementById("contadorRegistros").innerText = `${res.length} / ${datosCrudosLocales.length}`;
+        
+        // Imprime en la consola el JSON de filtros SOLO si no hay una transacción protegiendo la pantalla
+        if (!bloqueoPorTransaccion) {
+            const consola = document.getElementById("salidaConsola");
+            consola.style.color = "#38bdf8";
+            consola.innerText = `HTTP GET / GRID FILTER - Registros encontrados: ${res.length}\n\n${JSON.stringify(res, null, 2)}`;
+            consola.scrollTop = consola.scrollHeight;
+        }
+
+        if(res.length === 0) { cont.innerHTML = "<div>⚠️ Sin registros coincidentes.</div>"; return; }
+
+        let html = "";
+        res.forEach(item => {
+            if (t === "autos") {
+                const color = item.estado === "DISPONIBLE" ? "var(--success)" : item.estado === "ALQUILADO" ? "var(--primary)" : "var(--warning)";
+                html += `<div class="data-item"><div class="status-badge-line" style="background-color:${color}"></div><strong>ID: ${item.id}</strong> | Placa: <span style="color:var(--primary);font-weight:bold">${item.placa}</span><br>Vehículo: ${item.marca} ${item.modelo}<br>Estado H2: <b>${item.estado}</b> | Odom: ${formatearMiles(item.kilometraje)} km</div>`;
+            } else if (t === "clientes") {
+                const color = item.estado === "INACTIVO" ? "var(--danger)" : "var(--success)";
+                html += `<div class="data-item"><div class="status-badge-line" style="background-color:${color}"></div><strong>ID: ${item.id}</strong> | ${item.nombre}<br>Doc: ${item.tipoDocumento} - ${item.documento}<br>Estado: <b>${item.estado || 'ACTIVO'}</b></div>`;
+            } else if (t === "alquileres") {
+                const color = item.estado === "PENDIENTE" ? "var(--warning)" : item.estado === "ACTIVO" ? "var(--primary)" : "var(--border)";
+                const objetoAuto = cacheAutos.find(a => a.id === item.autoId);
+                const objetoCliente = cacheClientes.find(c => c.id === item.clienteId);
+                const placaTexto = objetoAuto ? objetoAuto.placa : "No encontrada";
+                const docTexto = objetoCliente ? `${objetoCliente.tipoDocumento} - ${objetoCliente.documento}` : "No encontrado";
+                
+                html += `<div class="data-item">
+                    <div class="status-badge-line" style="background-color:${color}"></div>
+                    <strong>Contrato ID: #${item.id}</strong> [${item.estado}]<br>
+                    🚗 Placa: ${placaTexto} (ID: ${item.autoId})<br>
+                    👥 Cliente Doc: ${docTexto} (ID: ${item.clienteId})<br>
+                    📅 Reservado el: <b>${item.fechaReserva || 'N/D'}</b><br>
+                    ⏳ Periodo: ${item.fechaInicio} al ${item.fechaFin}<br>
+                    <b>🏁 KM Inicial:</b> ${item.kilometrajeInicial !== null ? formatearMiles(item.kilometrajeInicial) : 'N/D'} | <b>KM Final:</b> ${item.kilometrajeFinal !== null ? formatearMiles(item.kilometrajeFinal) : 'N/D'}<br>
+                    Total: <b style="color:var(--success)">$${formatearMiles(item.valorTotal)}</b> (${item.cantidadDias} días)
+                </div>`;
+            }
+        });
+        cont.innerHTML = html;
+    }
+
+    function validarFormularios() {
+        // 1. Campos de Clientes
+        const nom = document.getElementById("clienteNombre").value.trim();
+        const doc = document.getElementById("clienteDoc").value.trim();
+        const tel = document.getElementById("clienteTel").value.trim();
+        const eml = document.getElementById("clienteEmail").value.trim();
+        
+        document.getElementById("btnRegistrarCliente").disabled = !(nom && doc && tel && eml);
+        document.getElementById("btnBajaCliente").disabled = !(doc);
+
+        // 2. Campos de Vehículos
+        const pla = document.getElementById("autoPlaca").value.trim();
+        const mar = document.getElementById("autoMarca").value.trim();
+        const mod = document.getElementById("autoModelo").value.trim();
+        const anio = document.getElementById("autoAnio").value.trim();
+        const prc = document.getElementById("autoPrecio").value.trim();
+        const dep = document.getElementById("autoDeposito").value.trim();
+        const km = document.getElementById("autoKilometraje").value.trim();
+
+        document.getElementById("btnRegistrarAuto").disabled = !(pla && mar && mod && anio && prc && dep && km);
+        document.getElementById("btnBajaAuto").disabled = !(pla && km);
+    }
+
+    window.onload = () => {
+        const inpPlaca = document.getElementById("autoPlaca");
+        const inpAlqPlaca = document.getElementById("alqAutoPlaca");
+        const inpMaintPlaca = document.getElementById("maintPlaca");
+
+        aplicarMascaraPlaca(inpPlaca);
+        aplicarMascaraPlaca(inpAlqPlaca);
+        aplicarMascaraPlaca(inpMaintPlaca);
+        
+        const camposAMonitorear = [
+            "clienteNombre", "clienteDoc", "clienteTel", "clienteEmail",
+            "autoPlaca", "autoMarca", "autoModelo", "autoAnio", "autoPrecio", "autoDeposito", "autoKilometraje"
+        ];
+        
+        camposAMonitorear.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.addEventListener("input", validarFormularios);
+        });
+        
+        const hoyIso = new Date().toISOString().split('T');
+        const calInicio = document.getElementById("alqFechaInicio");
+        const calRetorno = document.getElementById("finFechaReal");
+        
+        if(calInicio) { calInicio.value = hoyIso; calInicio.min = hoyIso; }
+        if(calRetorno) calRetorno.min = hoyIso;
+        
+        precargarColecciones();
+        setTimeout(() => { actualizarInterfazBuscador(); ejecutarConsulta(); validarFormularios(); }, 300);
+    };
+
+</script>
+</body>
+</html>
