@@ -616,4 +616,4 @@ Una vez que el servidor web embebido se encuentra en ejecución por medio de cua
 *   **Panel Operativo Frontend de Pruebas:** Si lo desea, puede abrir de manera directa en el navegador Google Chrome el archivo estático ubicado en la ruta del proyecto: `src/main/resources/static/index_v7.html` o ingresando a la ruta [http://localhost:8081/index_v7.html](http://localhost:8081/index_v7.html) para simular las transacciones y peticiones HTTP en tiempo real.
 
 ## Diagrama del proyecto
-<img width="3016" height="5998" alt="pc-autorent-jcoyh ENTREGABLE Diagrama" src="https://github.com/user-attachments/assets/940f79a4-6b6f-4c21-beed-ccc090ffdbdd" />
+<img width="2857" height="5950" alt="pc-autorent-jcoyh ENTREGABLE v02 Diagrama" src="https://github.com/user-attachments/assets/5e37da30-78d6-4fea-9fd1-766072066bbe" />
