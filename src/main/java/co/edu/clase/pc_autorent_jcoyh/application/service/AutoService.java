@@ -3,6 +3,7 @@ package co.edu.clase.pc_autorent_jcoyh.application.service;
 import co.edu.clase.pc_autorent_jcoyh.application.port.input.RegistrarAutoUseCase;
 import co.edu.clase.pc_autorent_jcoyh.application.port.input.DarBajaAutoUseCase;
 import co.edu.clase.pc_autorent_jcoyh.application.port.input.ActualizarMantenimientoUseCase;
+import co.edu.clase.pc_autorent_jcoyh.application.port.input.ActualizarTarifasAutoUseCase;
 import co.edu.clase.pc_autorent_jcoyh.application.port.output.AutoRepositoryPort;
 import co.edu.clase.pc_autorent_jcoyh.domain.model.Auto;
 import co.edu.clase.pc_autorent_jcoyh.domain.model.EstadosNegocio;
@@ -14,7 +15,8 @@ import java.util.List;
 
 public class AutoService implements RegistrarAutoUseCase, 
                                     ActualizarMantenimientoUseCase, 
-                                    DarBajaAutoUseCase {
+                                    DarBajaAutoUseCase,
+                                    ActualizarTarifasAutoUseCase {
     
     private final AutoRepositoryPort autoRepositoryPort;
 
@@ -25,6 +27,27 @@ public class AutoService implements RegistrarAutoUseCase,
 
     @Override
     public Auto registrarAuto(Auto auto) {
+
+        if (auto.getAnio() < 2000) {
+            throw new AutoException(MensajesError.AUTO_ANIO_INVALIDO);
+        }
+        if (auto.getPlaca() == null || auto.getPlaca().isBlank()) {
+            throw new AutoException(MensajesError.AUTO_PLACA_VACIA);
+        }
+
+        String regexPlaca = "^[A-Z]{3}-[0-9]{3}$";
+
+        if (!auto.getPlaca().trim().toUpperCase().matches(regexPlaca)) {
+            throw new AutoException(MensajesError.AUTO_PLACA_INVALIDA);
+        }
+        if (auto.getPrecioPorDia() < 1) {
+            throw new AutoException(MensajesError.AUTO_PRECIO_DIA_INVALIDO);
+        }
+        if (auto.getDeposito() < auto.getPrecioPorDia()) {
+            throw new AutoException(
+                String.format(MensajesError.AUTO_DEPOSITO_INVALIDO, auto.getDeposito(), auto.getPrecioPorDia())
+            );
+        }
 
         List<Auto> autosExistentes = autoRepositoryPort.buscarPorPlaca(auto.getPlaca());
 
@@ -117,4 +140,35 @@ public class AutoService implements RegistrarAutoUseCase,
         auto.setEstado(EstadosNegocio.AUTO_INACTIVO);
         return autoRepositoryPort.guardar(auto);
     }
+
+    @Override
+    public Auto actualizarTarifasAuto(Long id, 
+                                    double nuevoPrecioPorDia, 
+                                    double nuevoDeposito) {
+
+        Auto auto = autoRepositoryPort.buscarPorId(id)
+            .orElseThrow(() -> new NoEncontradoException(
+                String.format(MensajesError.AUTO_NO_REGISTRADO, id)
+            ));
+
+        if (EstadosNegocio.AUTO_INACTIVO.equalsIgnoreCase(auto.getEstado())) {
+            throw new AutoException(
+                String.format(MensajesError.AUTO_NO_DISPONIBLE, auto.getPlaca(), auto.getEstado())
+            );
+        }
+        if (nuevoPrecioPorDia < 1) {
+            throw new AutoException(MensajesError.AUTO_PRECIO_DIA_INVALIDO);
+        }
+        if (nuevoDeposito < nuevoPrecioPorDia) {
+            throw new AutoException(
+                String.format(MensajesError.AUTO_DEPOSITO_INVALIDO, nuevoDeposito, nuevoPrecioPorDia)
+            );
+        }
+
+        auto.setPrecioPorDia(nuevoPrecioPorDia);
+        auto.setDeposito(nuevoDeposito);
+
+        return autoRepositoryPort.guardar(auto);
+    }
+
 }

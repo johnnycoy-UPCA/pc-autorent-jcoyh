@@ -28,35 +28,71 @@ public class ClienteService implements RegistrarClienteUseCase,
         this.alquilerRepositoryPort = alquilerRepositoryPort;
     }
 
-    @Override
-    public Cliente registrarCliente(Cliente cliente) {
+    private void validarFormatoEmail(String email) {
+        String regexRFC5322 = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^-]+(?:\\.[a-zA-Z0-9_!#$%&'*+/=?`{|}~^-]+)*"
+                            + "@" 
+                            + "(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
 
-        if (cliente.getNombre() == null || cliente.getNombre().isBlank()) {
+        if (!email.matches(regexRFC5322)) {
+            throw new ClienteException(
+                String.format(MensajesError.CLIENTE_EMAIL_INVALIDO, email)
+            );
+        }
+    }
+
+    private void validarFormatoCelular(String celular) {
+        String regexCelular = "^3[0-9]{9}$";
+
+        if (!celular.matches(regexCelular)) {
+            throw new ClienteException(MensajesError.CLIENTE_CELULAR_INVALIDO);
+        }
+    }
+
+    @Override
+    public Cliente registrarCliente(String nombre, 
+                                    String tipoDocumento, 
+                                    String documentoCrudo, 
+                                    String celular, 
+                                    String email) {
+
+        if (nombre == null || 
+            documentoCrudo == null || 
+            email == null ||
+            celular == null || 
+            nombre.isBlank() || 
+            email.isBlank() ||
+            celular.isBlank() ||
+            documentoCrudo.isBlank()
+        ) {    
             throw new ClienteException(MensajesError.CLIENTE_CAMPO_OBLIGATORIO);
         }
-        if (cliente.getDocumento() == null || cliente.getDocumento() <= 0) {
-            throw new ClienteException(MensajesError.CLIENTE_DOCUMENTO_OBLIGATORIO);
-        }
-        if (cliente.getEmail() == null || !cliente.getEmail().contains("@")) {
-            throw new ClienteException(String.format(MensajesError.CLIENTE_EMAIL_INVALIDO, cliente.getEmail()));
+        if (!documentoCrudo.matches("^[0-9]+$")) {
+            throw new ClienteException(MensajesError.CLIENTE_DOCUMENTO_VALIDO);
         }
 
-        Optional<Cliente> clienteExistente = clienteRepositoryPort.buscarPorDocumento(cliente.getDocumento());
+        Long documentoNumerico = Long.parseLong(documentoCrudo);
+
+        if (documentoNumerico <= 0) {
+            throw new ClienteException(MensajesError.CLIENTE_DOCUMENTO_VALIDO);
+        }
+        validarFormatoEmail(email);
+        validarFormatoCelular(celular);
+
+        Optional<Cliente> clienteExistente = clienteRepositoryPort.buscarPorDocumento(documentoNumerico);
         
         if (clienteExistente.isPresent()) {
-            Cliente encontrado = clienteExistente.get();
                 throw new ClienteException(
-                    String.format(MensajesError.CLIENTE_DOCUMENTO_REPETIDO, encontrado.getDocumento())
+                    String.format(MensajesError.CLIENTE_DOCUMENTO_REPETIDO, documentoNumerico)
                 );
         }
 
         Cliente nuevoCliente = new Cliente(
                                     null,
-                                    cliente.getNombre(),
-                                    cliente.getTipoDocumento(),
-                                    cliente.getDocumento(),
-                                    cliente.getCelular(),
-                                    cliente.getEmail(),
+                                    nombre,
+                                    tipoDocumento,
+                                    documentoNumerico,
+                                    celular,
+                                    email.trim().toLowerCase(),
                                     EstadosNegocio.CLIENTE_ACTIVO
                                 );
 
@@ -100,15 +136,15 @@ public class ClienteService implements RegistrarClienteUseCase,
             );                                        
 
         if (nuevoEmail != null) {
-            if (!nuevoEmail.contains("@")) {
-                throw new ClienteException(
-                    String.format(MensajesError.CLIENTE_EMAIL_INVALIDO, nuevoEmail)
-                );
-            }
+            validarFormatoEmail(nuevoEmail);
         }
         
         cliente.setCelular(nuevoTelefono == null ? cliente.getCelular() : nuevoTelefono);
-        cliente.setEmail(nuevoEmail == null ? cliente.getEmail() : nuevoEmail);
+        cliente.setEmail(nuevoEmail == null ? cliente.getEmail() : nuevoEmail.trim().toLowerCase());
+
+        if (EstadosNegocio.CLIENTE_INACTIVO.equalsIgnoreCase(cliente.getEstado())) {
+            cliente.setEstado(EstadosNegocio.CLIENTE_ACTIVO);
+        }
 
         return clienteRepositoryPort.guardar(cliente);
     }

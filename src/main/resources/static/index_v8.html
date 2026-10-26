@@ -120,6 +120,13 @@
             transition: background 0.2s;
             font-size: 0.85em;
         }
+        button:disabled {
+            background-color: #cbd5e1 !important;
+            color: #94a3b8 !important;
+            cursor: not-allowed !important;
+            opacity: 0.6;
+            box-shadow: none !important;
+        }
         .btn-primary { background-color: var(--primary); color: white; }
         .btn-success { background-color: var(--success); color: white; }
         .btn-danger { background-color: var(--danger); color: white; }
@@ -212,21 +219,24 @@
                 <h3>👥 Gestión de Clientes</h3>
                 <div class="form-group"><label>Nombre Completo:</label><input type="text" id="clienteNombre" placeholder="Carlos Pérez"></div>
                 <div class="form-row-horizontal">
-                    <div class="form-group" style="flex: 2;"><label>Tipo Doc:</label>
+                    <div class="form-group" style="flex: 3;"><label>Tipo Documento:</label>
                         <select id="clienteTipoDoc">
-                            <option value="CC">CC</option>
-                            <option value="CE">CE</option>
-                            <option value="PA">PA</option>
+                            <option value="CC">Cédula de Ciudadanía [CC]</option>
+                            <option value="CE">Cédula de Extranjería [CE]</option>
+                            <option value="PA">Pasaporte [PA]</option>
+                            <option value="NIT">Identificación Tributaria [NIT]</option>
                         </select>
                     </div>
-                    <div class="form-group" style="flex: 4;"><label>Documento (Baja):</label><input class="input-baja-requerido" type="number" id="clienteDoc" placeholder="1234567890"></div>
+                    <div class="form-group" style="flex: 2;"><label>Documento:</label><input class="input-baja-requerido" type="number" id="clienteDoc" placeholder="1234567890"></div>
                 </div>
                 <div class="form-row-horizontal">
-                    <div class="form-group"><label>Teléfono:</label><input type="text" id="clienteCel" placeholder="3001234567"></div>
-                    <div class="form-group"><label>Email:</label><input type="email" id="clienteEmail" placeholder="carlos@email.com"></div>
+                    <div class="form-group" style="flex: 2;"><label>Celular:</label><input type="text" id="clienteCel" placeholder="3001234567"></div>
+                    <div class="form-group" style="flex: 3;"><label>Email:</label><input type="email" id="clienteEmail" placeholder="carlos@email.com"></div>
                 </div>
                 <div class="form-row-horizontal" style="margin-top: 5px;">
                     <button class="btn-primary" id="btnRegistrarCliente" onclick="registrarCliente()" disabled>Registrar Cliente</button>
+                    <!-- <button class="btn-warning" id="btnActualizarCliente" onclick="actualizacionCliente()" style="background-color: var(--info); color: white;" disabled>Actualizar Contacto</button> -->
+                     <button class="btn-info" id="btnAccionCliente" onclick="controlarFlujoCliente()" style="background-color: var(--info); color: white;">Consultar Cliente</button>
                     <button class="btn-danger" id="btnBajaCliente" onclick="darBajaCliente()" style="flex: 0 0 110px;" disabled>Dar de Baja</button>
                 </div>
 
@@ -234,7 +244,7 @@
 
                 <h3>🚗 Gestión de Vehículos</h3>
                 <div class="form-row-horizontal">
-                    <div class="form-group" style="flex: 2;"><label>Placa (Baja):</label><input class="input-baja-requerido" type="text" id="autoPlaca" placeholder="ABC-123"></div>
+                    <div class="form-group" style="flex: 2;"><label>Placa:</label><input class="input-baja-requerido" type="text" id="autoPlaca" placeholder="ABC-123"></div>
                     <div class="form-group" style="flex: 3;"><label>Marca:</label><input type="text" id="autoMarca" placeholder="Mazda"></div>
                     <div class="form-group" style="flex: 3;"><label>Modelo:</label><input type="text" id="autoModelo" placeholder="CX-30"></div>
                 </div>
@@ -243,9 +253,10 @@
                     <div class="form-group"><label>Costo/Día ($):</label><input type="number" id="autoPrecio" placeholder="100000"></div>
                     <div class="form-group"><label>Depósito ($):</label><input type="number" id="autoDeposito" placeholder="100000"></div>
                 </div>
-                <div class="form-group"><label>Kilometraje Actual:</label><input class="input-baja-requerido" type="number" id="autoKilometraje" placeholder="0000"></div>
+                <div class="form-group"><label>Kilometraje Inicial:</label><input type="number" id="autoKilometraje" placeholder="0000"></div>
                 <div class="form-row-horizontal">
                     <button class="btn-primary" id="btnRegistrarAuto" onclick="registrarAuto()" disabled>Registrar Vehículo</button>
+                    <button class="btn-info" id="btnAccionAuto" onclick="controlarFlujoAuto()" style="background-color: var(--info); color: white;">Consultar Vehículo</button>
                     <button class="btn-danger" id="btnBajaAuto" onclick="darBajaAuto()" style="flex: 0 0 110px;" disabled>Dar de Baja</button>
                 </div>
             </div>
@@ -261,7 +272,7 @@
                     <div class="form-group"><label>Fecha Inicio:</label><input type="date" id="alqFechaInicio"></div>
                     <div class="form-group" style="flex: 0 0 90px;"><label>Días:</label><input type="number" id="alqDias" placeholder="0"></div>
                 </div>
-                <button class="btn-success" onclick="crearAlquiler()">Registrar Reserva</button>
+                <button class="btn-success" onclick="crearAlquiler()" disabled>Registrar Reserva</button>
 
                 <div class="divider"></div>
 
@@ -277,9 +288,9 @@
                     <label for="chkRollover">⚠️ El odómetro físico dio la vuelta (Reinicio a cero)</label>
                 </div>
                 <div class="form-row-horizontal" style="margin-top: 8px;">
-                    <button class="btn-info" onclick="activarReserva()">Entregar</button>
-                    <button class="btn-danger" onclick="finalizarAlquiler()">Finalizar</button>
-                    <button class="btn-warning" onclick="cancelarAlquiler()" style="background-color: #64748b;">Cancelar</button>
+                    <button class="btn-info" onclick="activarReserva()" disabled>Entregar</button>
+                    <button class="btn-danger" onclick="finalizarAlquiler()" disabled>Finalizar</button>
+                    <button class="btn-warning" onclick="cancelarAlquiler()" style="background-color: #64748b;" disabled>Cancelar</button>
                 </div>
 
                 <div class="divider-taller"></div>
@@ -295,8 +306,8 @@
                     <label for="chkRolloverMaint">⚠️ El odómetro físico dio la vuelta (Reinicio a cero)</label>
                 </div>
                 <div class="form-row-horizontal">
-                    <button class="btn-info" onclick="alterarMantenimiento(true)">Ingresar</button>
-                    <button class="btn-success" onclick="alterarMantenimiento(false)">Liberar</button>
+                    <button class="btn-info" onclick="alterarMantenimiento(true)" disabled>Ingresar</button>
+                    <button class="btn-success" onclick="alterarMantenimiento(false)" disabled>Liberar</button>
                 </div>
             </div>
         </div>
@@ -355,13 +366,11 @@
     let cacheAutos = [];
     let cacheClientes = [];
 
-    // Formato de miles
     function formatearMiles(valor) {
         if (valor === null || valor === undefined) return "N/D";
         return Number(valor).toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
 
-    // Intercambio asincrónico de pestañas
     function switchTab(contentId) {
         document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -370,7 +379,6 @@
         document.getElementById(contentId).classList.add('active');
     }
 
-    // Placas (3 Letras - 3 Números)
     function aplicarMascaraPlaca(el) {
         el.addEventListener("input", function (e) {
             let val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
@@ -384,26 +392,138 @@
         fetch(`${HOST}/clientes`).then(r => r.json()).then(d => { cacheClientes = d; });
     }
 
+    // ✅ FUNCIÓN DE LIMPIEZA CENTRALIZADA (Clean Code - DRY)
+    function limpiarFormulariosYBotones() {
+        // 1. Vaciar campos de Clientes
+        document.getElementById("clienteNombre").value = "";
+        document.getElementById("clienteDoc").value = "";
+        document.getElementById("clienteCel").value = "";
+        document.getElementById("clienteEmail").value = "";
+
+        // 2. Vaciar campos de Vehículos
+        document.getElementById("autoPlaca").value = "";
+        document.getElementById("autoMarca").value = "";
+        document.getElementById("autoModelo").value = "";
+        document.getElementById("autoAnio").value = "";
+        document.getElementById("autoPrecio").value = "";
+        document.getElementById("autoDeposito").value = "";
+        document.getElementById("autoKilometraje").value = "";
+
+        // 3. Restaurar Botón Dual de Clientes a su estado original
+        const btnAccionCliente = document.getElementById("btnAccionCliente");
+        if (btnAccionCliente) {
+            btnAccionCliente.innerText = "Consultar Cliente";
+            btnAccionCliente.style.backgroundColor = "var(--info)";
+        }
+
+        // 4. Restaurar Botón Dual de Vehículos a su estado original
+        const btnAccionAuto = document.getElementById("btnAccionAuto");
+        if (btnAccionAuto) {
+            btnAccionAuto.innerText = "Consultar Vehículo";
+            btnAccionAuto.style.backgroundColor = "var(--info)";
+        }
+
+        // 5. Bloquear botones de acción por falta de datos diligenciados
+        document.getElementById("btnRegistrarCliente").disabled = true;
+        document.getElementById("btnBajaCliente").disabled = true;
+        document.getElementById("btnRegistrarAuto").disabled = true;
+        document.getElementById("btnBajaAuto").disabled = true;
+
+        // 6. Limpiar referencias de tracking en memoria RAM
+        clienteConsultadoExistente = null;
+        autoConsultadoExistente = null;
+    }
+
     function registrarCliente() {
         const payload = {
             nombre: document.getElementById("clienteNombre").value.trim(),
             tipoDocumento: document.getElementById("clienteTipoDoc").value,
-            documento: parseInt(document.getElementById("clienteDoc").value),
+            documento: document.getElementById("clienteDoc").value.trim(),
             celular: document.getElementById("clienteCel").value.trim(),
             email: document.getElementById("clienteEmail").value.trim()
         };
         fetch(`${HOST}/clientes`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
-        .then(res => res.json().then(data => pintarConsola(res.status, data)));
+        .then(res => res.json().then(data => {
+            pintarConsola(res.status, data)
+            if (res.ok) {
+                alert(`Cliente "${data.nombre}" registrado con éxito.`);
+                limpiarFormulariosYBotones();
+                ejecutarConsulta(); // Refresca la tabla de clientes
+            }
+        }));
     }
 
     function darBajaCliente() {
+        if (!clienteConsultadoExistente) return alert("Primero consulte un cliente válido.");
+
+        // Alerta de confirmación exigida
+        if (confirm(`⚠️ ¿Está seguro que desea dar de baja al cliente "${clienteConsultadoExistente.nombre}"? Esta acción restringirá sus contratos.`)) {
+            fetch(`${HOST}/clientes/${clienteConsultadoExistente.id}/desactivar`, { method: "PUT" })
+            .then(res => res.json().then(data => {
+                pintarConsola(res.status, data);
+                if (res.ok) {
+                    alert("El cliente ha sido desactivado con éxito.");
+                    limpiarFormulariosYBotones();
+                    ejecutarConsulta(); // Refresca la tabla de clientes
+                }
+            }));
+        }
+    }
+
+    function registrarCambiosEnCamposContacto() {
+        if (clienteConsultadoExistente) {
+            // Deshabilita la opción de baja por inconsistencia de datos editados
+            document.getElementById("btnBajaCliente").disabled = true;
+            
+            // Muta visualmente el botón de control hacia Actualizar Contacto
+            const btnAccion = document.getElementById("btnAccionCliente");
+            btnAccion.innerText = "Actualizar Contacto";
+            btnAccion.style.backgroundColor = "var(--warning)";
+        }
+        validarFormularios();
+    }
+
+    function actualizarContactoCliente() {
         const doc = parseInt(document.getElementById("clienteDoc").value);
-        fetch(`${HOST}/clientes`).then(r => r.json()).then(list => {
-            const found = list.find(c => c.documento === doc && c.estado !== 'INACTIVO');
-            if (!found) return alert("Cliente no registrado o ya inactivo.");
-            if (confirm(`¿Desactivar al cliente ${found.nombre}?`)) {
-                fetch(`${HOST}/clientes/${found.id}/desactivar`, { method: "PUT" }).then(res => res.json().then(data => pintarConsola(res.status, data)));
-            }
+        if (!doc) return alert("Por favor, ingrese el documento del cliente en el campo correspondiente.");
+
+        const payload = {
+            celular: document.getElementById("clienteCel").value.trim() || null,
+            email: document.getElementById("clienteEmail").value.trim() || null
+        };
+
+        // Buscamos el ID interno en el catálogo H2 usando el documento
+        fetch(`${HOST}/clientes`).then(r => r.json())
+        .then(list => {
+            const found = list.find(c => c.documento === doc);
+            if (!found) return alert("Cliente no encontrado en la base de datos.");
+
+            const estabaInactivo = (found.estado === 'INACTIVO');
+
+            fetch(`${HOST}/clientes/${found.id}/actualizar`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+            .then(res => {
+                if (res.ok) {
+                    res.json().then(data => {
+                        pintarConsola(res.status, data);
+                        
+                        // Mensaje de éxito contextualizado
+                        if (estabaInactivo) {
+                            alert(`🎉 ¡Datos actualizados! El cliente "${data.nombre}" se encontraba INACTIVO y ha sido REACTIVADO con éxito en el sistema.`);
+                        } else {
+                            alert("Datos de contacto actualizados correctamente.");
+                        }
+
+                        limpiarFormulariosYBotones();
+                        ejecutarConsulta(); // Sincroniza vista H2
+                    });
+                } else {
+                    res.json().then(data => pintarConsola(res.status, data));
+                }
+            });
         });
     }
 
@@ -418,17 +538,77 @@
             kilometraje: parseInt(document.getElementById("autoKilometraje").value)
         };
         fetch(`${HOST}/autos`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
-        .then(res => res.json().then(data => pintarConsola(res.status, data)));
+        .then(res => res.json().then(data => {
+            pintarConsola(res.status, data)
+            if (res.ok) {
+                alert(`Vehículo con placa "${data.placa}" registrado con éxito.`);
+                limpiarFormulariosYBotones();
+                ejecutarConsulta(); // Refresca la tabla de autos
+            }
+        }));
     }
 
     function darBajaAuto() {
         const placa = document.getElementById("autoPlaca").value.trim().toUpperCase();
-        fetch(`${HOST}/autos`).then(r => r.json()).then(list => {
+        fetch(`${HOST}/autos`).then(r => r.json())
+        .then(list => {
             const found = list.find(a => a.placa.toUpperCase() === placa && a.estado !== 'INACTIVO');
             if (!found) return alert("Vehículo no encontrado o ya inactivo.");
             if (confirm(`¿Dar de baja definitiva al vehículo placa ${found.placa}?`)) {
-                fetch(`${HOST}/autos/${found.id}/desactivar`, { method: "PUT" }).then(res => res.json().then(data => pintarConsola(res.status, data)));
+                fetch(`${HOST}/autos/${found.id}/desactivar`, { method: "PUT" })
+                .then(res => res.json().then(data => {
+                    pintarConsola(res.status, data)
+                    if (res.ok) {
+                        alert(`Vehículo con placa ${found.placa} dado de baja correctamente.`);
+                        limpiarFormulariosYBotones();
+                        ejecutarConsulta(); // Refresca la tabla de autos
+                    }
+                }));
             }
+        });
+    }
+
+    function registrarCambiosEnCamposTarifas() {
+        if (autoConsultadoExistente) {
+            document.getElementById("btnBajaAuto").disabled = true;
+            
+            const btnAccion = document.getElementById("btnAccionAuto");
+            btnAccion.innerText = "Actualizar Tarifas";
+            btnAccion.style.backgroundColor = "var(--warning)";
+        }
+        validarFormularios();
+    }
+
+    function actualizarTarifasAuto() {
+        const placaInput = document.getElementById("autoPlaca").value.trim().toUpperCase();
+        const precioInput = parseFloat(document.getElementById("autoPrecio").value);
+        const depositoInput = parseFloat(document.getElementById("autoDeposito").value);
+
+        fetch(`${HOST}/autos`).then(r => r.json())
+        .then(list => {
+            const found = list.find(a => a.placa.toUpperCase() === placaInput);
+            if (!found) return alert("Vehículo no encontrado en el catálogo H2.");
+
+            const payload = { precioPorDia: precioInput, deposito: depositoInput };
+
+            fetch(`${HOST}/autos/${found.id}/tarifas`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+            .then(res => {
+                if (res.ok) {
+                    res.json().then(data => {
+                        pintarConsola(res.status, data);
+                        alert(`💸 Tarifas y depósitos actualizados correctamente para el vehículo con placa ${data.placa}.`);
+
+                        limpiarFormulariosYBotones(); // Limpieza centralizada de formularios y botones
+                        ejecutarConsulta(); // Sincroniza vista H2
+                    });
+                } else {
+                    res.json().then(data => pintarConsola(res.status, data));
+                }
+            });
         });
     }
 
@@ -462,7 +642,6 @@
         const id = document.getElementById("finAlqId").value;
         if (!id) return alert("Por favor ingrese el ID del contrato.");
 
-        // Se remueve el payload de kilometraje inicial ya que el backend lo infiere del Auto automáticamente
         fetch(`${HOST}/alquileres/${id}/iniciar`, { 
             method: "PUT",
             headers: { "Content-Type": "application/json" }
@@ -483,10 +662,10 @@
 
                 if (isRollover) {
                     const cantidadDigitos = String(kmAnterior).length;
-                    const limiteOdometro = Math.pow(10, cantidadDigitos) - 1; // 99999 para 5 dígitos
+                    const limiteOdometro = Math.pow(10, cantidadDigitos) - 1;
                     
                     const remanente = limiteOdometro - kmAnterior;
-                    kmFinal = remanente + 1 + kmFinal; // Ajuste neto de kilómetros reales
+                    kmFinal = remanente + 1 + kmFinal;
                     
                     alert(`⚡ Rollover Activado:\n• Km Anterior: ${kmAnterior}\n• Ajuste de Cierre: ${kmFinal} km.`);
                 }
@@ -518,7 +697,6 @@
     function ejecutarConsulta() {
         const t = document.getElementById("tablaSelector").value;
         
-        // Sincroniza para asegurar que placas y documentos no salgan vacíos
         fetch(`${HOST}/autos`).then(r => r.json()).then(ats => {
             cacheAutos = ats;
             return fetch(`${HOST}/clientes`).then(r => r.json());
@@ -532,7 +710,7 @@
     }
 
 
-    let bloqueoPorTransaccion = false; // Para evitar sobreescritura de Consola JSON
+    let bloqueoPorTransaccion = false;
 
     function pintarConsola(status, data) {
         bloqueoPorTransaccion = true;
@@ -615,12 +793,8 @@
             if (fId !== "" && item.id.toString() !== fId) return false;
             
             if (t === "alquileres") {
-                // Filtro 1: Fecha de Reserva
-                // const fReserva = document.getElementById("filtroFechaReservaUnica").value;
                 if (fReserva && item.fechaReserva && item.fechaReserva !== fReserva) return false;
 
-                // Filtro 2: Fecha de Alquiler en el rango
-                // const fPeriodo = document.getElementById("filtroFechaEnPeriodo").value;
                 if (fPeriodo && item.fechaInicio && item.fechaFin) {
                     const estaEnRango = (fPeriodo >= item.fechaInicio && fPeriodo <= item.fechaFin);
                     if (!estaEnRango) return false;
@@ -636,7 +810,6 @@
 
         document.getElementById("contadorRegistros").innerText = `${res.length} / ${datosCrudosLocales.length}`;
         
-        // Imprime en la consola el JSON de filtros SOLO si no hay una transacción protegiendo la pantalla
         if (!bloqueoPorTransaccion) {
             const consola = document.getElementById("salidaConsola");
             consola.style.color = "#38bdf8";
@@ -676,17 +849,18 @@
         cont.innerHTML = html;
     }
 
+    let clienteConsultadoExistente = null;
+    let autoConsultadoExistente = null;
+
     function validarFormularios() {
-        // 1. Campos de Clientes
         const nom = document.getElementById("clienteNombre").value.trim();
         const doc = document.getElementById("clienteDoc").value.trim();
         const tel = document.getElementById("clienteCel").value.trim();
         const eml = document.getElementById("clienteEmail").value.trim();
         
         document.getElementById("btnRegistrarCliente").disabled = !(nom && doc && tel && eml);
-        document.getElementById("btnBajaCliente").disabled = !(doc);
+        // document.getElementById("btnBajaCliente").disabled = !(doc);
 
-        // 2. Campos de Vehículos
         const pla = document.getElementById("autoPlaca").value.trim();
         const mar = document.getElementById("autoMarca").value.trim();
         const mod = document.getElementById("autoModelo").value.trim();
@@ -696,8 +870,78 @@
         const km = document.getElementById("autoKilometraje").value.trim();
 
         document.getElementById("btnRegistrarAuto").disabled = !(pla && mar && mod && anio && prc && dep && km);
-        document.getElementById("btnBajaAuto").disabled = !(pla && km);
+        // document.getElementById("btnBajaAuto").disabled = !(pla && km);
     }
+
+    function controlarFlujoCliente() {
+        const boton = document.getElementById("btnAccionCliente");
+        if (boton.innerText === "Consultar Cliente") {
+            consultarClientePorDocumento();
+        } else {
+            actualizarContactoCliente();
+        }
+    }
+
+    function controlarFlujoAuto() {
+        const boton = document.getElementById("btnAccionAuto");
+        if (boton.innerText === "Consultar Vehículo") {
+            consultarAutoPorPlaca();
+        } else {
+            actualizarTarifasAuto();
+        }
+    }
+
+    function consultarClientePorDocumento() {
+        const docInput = document.getElementById("clienteDoc").value.trim();
+        if (!docInput) return alert("Por favor digite el Documento para realizar la consulta.");
+        
+        fetch(`${HOST}/clientes`).then(r => r.json()).then(list => {
+            const found = list.find(c => c.documento === parseInt(docInput));
+            if (!found) {
+                alert("Cliente no registrado en el sistema AutoRent.");
+                clienteConsultadoExistente = null;
+                document.getElementById("btnBajaCliente").disabled = true;
+                return;
+            }
+            
+            clienteConsultadoExistente = found;
+            document.getElementById("clienteNombre").value = found.nombre;
+            document.getElementById("clienteTipoDoc").value = found.tipoDocumento;
+            document.getElementById("clienteCel").value = found.celular || "";
+            document.getElementById("clienteEmail").value = found.email || "";
+            
+            document.getElementById("btnBajaCliente").disabled = (found.estado === 'INACTIVO');
+            validarFormularios();
+        });
+    }
+
+    function consultarAutoPorPlaca() {
+        const placaInput = document.getElementById("autoPlaca").value.trim().toUpperCase();
+        if (!placaInput) return alert("Por favor digite la Placa para realizar la consulta.");
+        
+        fetch(`${HOST}/autos`).then(r => r.json()).then(list => {
+            const found = list.find(a => a.placa.toUpperCase() === placaInput);
+            if (!found) {
+                alert("Vehículo no registrado en el catálogo AutoRent.");
+                autoConsultadoExistente = null;
+                document.getElementById("btnBajaAuto").disabled = true;
+                return;
+            }
+            
+            autoConsultadoExistente = found;
+            document.getElementById("autoMarca").value = found.marca;
+            document.getElementById("autoModelo").value = found.modelo;
+            document.getElementById("autoAnio").value = found.anio;
+            document.getElementById("autoPrecio").value = found.precioPorDia;
+            document.getElementById("autoDeposito").value = found.deposito;
+            document.getElementById("autoKilometraje").value = found.kilometraje;
+            
+            // Habilita dar de baja solo si el auto no se encuentra ya inactivo
+            document.getElementById("btnBajaAuto").disabled = (found.estado === 'INACTIVO');
+            validarFormularios();
+        });
+    }
+
 
     window.onload = () => {
         const inpPlaca = document.getElementById("autoPlaca");
@@ -718,6 +962,48 @@
             if(el) el.addEventListener("input", validarFormularios);
         });
         
+        const campoCelular = document.getElementById("clienteCel");
+        const campoEmail = document.getElementById("clienteEmail");
+        if(campoCelular) campoCelular.addEventListener("input", registrarCambiosEnCamposContacto);
+        if(campoEmail) campoEmail.addEventListener("input", registrarCambiosEnCamposContacto);
+        
+        // Si limpian o alteran el Documento, reseteamos el botón dual a modo "Consultar"
+        const campoDocumento = document.getElementById("clienteDoc");
+        if(campoDocumento) {
+            campoDocumento.addEventListener("input", () => {
+                const btnAccion = document.getElementById("btnAccionCliente");
+                if(btnAccion) {
+                    btnAccion.innerText = "Consultar Cliente";
+                    btnAccion.style.backgroundColor = "var(--info)";
+                }
+                const btnBaja = document.getElementById("btnBajaCliente");
+                if(btnBaja) btnBaja.disabled = true;
+                
+                clienteConsultadoExistente = null;
+            });
+        }
+
+        const campoPrecio = document.getElementById("autoPrecio");
+        const campoDeposito = document.getElementById("autoDeposito");
+        if(campoPrecio) campoPrecio.addEventListener("input", registrarCambiosEnCamposTarifas);
+        if(campoDeposito) campoDeposito.addEventListener("input", registrarCambiosEnCamposTarifas);
+        
+        // Si limpian o alteran la caja de la Placa, reseteamos la máquina de estados a Consulta
+        const campoPlaca = document.getElementById("autoPlaca");
+        if(campoPlaca) {
+            campoPlaca.addEventListener("input", () => {
+                const btnAccion = document.getElementById("btnAccionAuto");
+                if(btnAccion) {
+                    btnAccion.innerText = "Consultar Vehículo";
+                    btnAccion.style.backgroundColor = "var(--info)";
+                }
+                const btnBaja = document.getElementById("btnBajaAuto");
+                if(btnBaja) btnBaja.disabled = true;
+                
+                autoConsultadoExistente = null; // Resetea tracking local
+            });
+        }
+
         const hoyIso = new Date().toISOString().split('T');
         const calInicio = document.getElementById("alqFechaInicio");
         const calRetorno = document.getElementById("finFechaReal");

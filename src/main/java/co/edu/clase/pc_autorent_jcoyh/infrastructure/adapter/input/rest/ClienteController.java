@@ -5,6 +5,9 @@ import co.edu.clase.pc_autorent_jcoyh.application.port.input.ActualizarClienteUs
 import co.edu.clase.pc_autorent_jcoyh.application.port.input.RegistrarClienteUseCase;
 import co.edu.clase.pc_autorent_jcoyh.application.port.output.ClienteRepositoryPort;
 import co.edu.clase.pc_autorent_jcoyh.domain.model.Cliente;
+import co.edu.clase.pc_autorent_jcoyh.infrastructure.adapter.input.rest.dto.ActualizarClienteDto;
+import co.edu.clase.pc_autorent_jcoyh.infrastructure.adapter.input.rest.dto.CrearClienteDto;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,8 +35,12 @@ public class ClienteController {
     }
 
     @PostMapping
-    public ResponseEntity<Cliente> crearCliente(@RequestBody Cliente cliente) {
-        Cliente clienteRegistrado = registrarClienteUseCase.registrarCliente(cliente);
+    public ResponseEntity<Cliente> crearCliente(@RequestBody CrearClienteDto request) {
+        Cliente clienteRegistrado = registrarClienteUseCase.registrarCliente(request.getNombre(), 
+                                                                            request.getTipoDocumento(), 
+                                                                            request.getDocumento(), 
+                                                                            request.getCelular(), 
+                                                                            request.getEmail());
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(clienteRegistrado);
@@ -47,7 +54,8 @@ public class ClienteController {
     }
 
     @PutMapping("/{id}/actualizar")
-    public ResponseEntity<Cliente> actualizarCliente(@PathVariable("id") Long clienteId, @RequestBody Cliente request) {
+    public ResponseEntity<Cliente> actualizarCliente(@PathVariable("id") Long clienteId, 
+                                                    @RequestBody ActualizarClienteDto request) {
         Cliente clienteActualizado = actualizarClienteUseCase.actualizarCliente(clienteId,
                                                                                 request.getCelular(),
                                                                                 request.getEmail()

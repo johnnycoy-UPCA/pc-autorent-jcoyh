@@ -10,7 +10,7 @@ public class AutoEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 7)
+    @Column(nullable = false, unique = true, length = 7)
     private String placa;
 
     @Column(nullable = false, length = 50)

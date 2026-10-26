@@ -4,7 +4,7 @@ public class CrearAutoDto {
     private String placa;
     private String marca;
     private String modelo;
-    private Integer anio;
+    private int anio;
     private double precioPorDia;
     private double deposito;
     private Double kilometraje;
@@ -32,10 +32,10 @@ public class CrearAutoDto {
         this.modelo = modelo; 
     }
 
-    public Integer getAnio() { 
+    public int getAnio() { 
         return anio; 
     }
-    public void setAnio(Integer anio) { 
+    public void setAnio(int anio) { 
         this.anio = anio; 
     }
 

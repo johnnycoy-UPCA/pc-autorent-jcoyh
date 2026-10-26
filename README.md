@@ -1,6 +1,6 @@
-# 🚗 AutoRent — Sistema de Alquiler de Autos
+# 🚗 AutoRent — Sistema de Alquiler de Autos (Enterprise Version)
 
-Sistema empresarial de gestión de reservas, alquileres y control operativo de vehículos, desarrollado aplicando de forma estricta los principios de la **Arquitectura Hexagonal (Ports & Adapters)** y **Clean Code**. El diseño garantiza que el núcleo del negocio permanezca 100% agnóstico e independiente de frameworks tecnológicos, librerías de persistencia o interfaces web externas.
+Sistema empresarial de gestión de reservas, alquileres y control operativo de la flota vehicular de la compañía, desarrollado aplicando de forma estricta los principios de la **Arquitectura Hexagonal (Ports & Adapters)**, **Clean Code** y el diseño de **Modelo de Dominio Anémico**. El Core del negocio permanece 100% agnóstico e inmune a acoplamientos con frameworks de red, anotaciones de persistencia relacional o interfaces externas.
 
 ## 👥 Integrantes y Datos Generales
 * **Nombre del Proyecto:** pc-autorent-jcoyh
@@ -8,57 +8,82 @@ Sistema empresarial de gestión de reservas, alquileres y control operativo de v
 * **Docente:** Ing. Iván Devia Acosta
 * **Desarrollador:** Johnny Coy Herrera
 
-## 🛠️ Tecnologías Utilizadas
-* **Lenguaje:** Java 17
-* **Framework Principal:** Spring Boot 4.1.1
-* **Persistencia:** Spring Data JPA / Hibernate
-* **Base de Datos:** H2 Database
-* **Frontend de Pruebas:** HTML5, CSS3 y JavaScript
+## 🛠️ Tecnologías y Módulos Utilizados
+* **Lenguaje:** Java 17 (JDK Puro).
+* **Framework Principal:** Spring Boot 4.1.2 (Restringido estrictamente a la periferia de infraestructura).
+* **Persistencia:** Spring Data JPA / Hibernate Core.
+* **Motor Relacional:** H2 Database Engine (In-Memory).
+* **Frontend de Control Operativo:** HTML5, CSS3 Avanzado (Con estados visuales UX reactivos) y JavaScript Moderno (Async/Await & Event-Listeners).
 
 ---
 
-## 🏛️ Estructura de la Arquitectura
-El proyecto implementa la arquitectura hexagonal, aislando por completo las clases del core de cualquier anotación de Spring Boot. Toda la inyección de dependencias y la transaccionalidad relacional se configuran de manera centralizada en la frontera de infraestructura (`BeanConfiguration.java`)
+## 🏛️ Estructura de la Arquitectura (Hexágono Puro)
+El proyecto implementa un aislamiento perimetral total. Las clases situadas en el core (`domain/model`) son POJOs planos inmutables y anémicos. Toda la inyección de dependencias y el control de transacciones de la base de datos se centralizan en los muros de la infraestructura (`BeanConfiguration.java`).
 
 ```text
 co.edu.clase.pc_autorent_jcoyh
-├── domain/                         <-- NÚCLEO PURO (0% Acoplado a Frameworks)
-    │       └── repository/         <-- Interfaces nativas de Spring Data JpaRepository
-    └── config/
-        └── BeanConfiguration.java  <-- Muro Perimetral: Configura Beans y @Transactional
+├── domain/                         <-- NÚCLEO ANÉMICO PURO (0% anotaciones de Frameworks)
+│   ├── model/                      <-- POJOs pasivos de datos (Auto, Cliente, Alquiler)
+│   └── exception/                  <-- Control semántico de errores del negocio
+├── application/                    <-- CAPA INTERMEDIA DE ORQUESTACIÓN
+│   ├── port/                       
+│   │   ├── input/                  <-- Casos de Uso (Fronteras de Entrada)
+│   │   └── output/                 <-- Contratos de Persistencia (Puertos de Salida)
+│   └── service/                    <-- Motores lógicos. Centralizan validaciones y ecuaciones
+└── infrastructure/                 <-- PERIFERIA TÉCNICA (Frameworks y Herramientas)
+    ├── adapter/
+    │   ├── input/rest/             <-- Controladores HTTP y DTOs de amortiguación de red
+    │   └── output/persistence/     <-- Entidades físicas, Mappers y Repositorios JPA
+    └── config/                     <-- BeanConfiguration: Muro perimetral de inyección
 ```
 
 ---
 
-## 💼 Reglas de Negocio Implementadas
-1. **Disponibilidad Estricta:** Solo se pueden alquilar vehículos en estado `DISPONIBLE`.
-2. **Cálculo Automático Obligatorio:** El `valorTotal` del contrato se liquida de forma automática multiplicando la cantidad de días por el precio por día del carro. El cliente no puede forzar este monto desde la red.
-3. **Flujo de Reservas:** Los contratos cuyas fechas de inicio sean futuras nacen en estado `PENDIENTE` (Reserva), permitiendo que el vehículo siga disponible en el mostrador para uso inmediato en el presente. Al invocar `activarReserva`, el contrato pasa a `ACTIVO` y el auto se bloquea a `ALQUILADO`.
-4. **Muro de Cruce de Fechas:** No se permite la creación ni la activación de reservas si las fechas solicitadas se solapan con algún contrato activo o pendiente previo en el inventario H2.
-5. **Cierre Flexible y Control de Odómetro:** Al finalizar una renta, se actualiza el millaje del vehículo. El sistema valida estrictamente que el odómetro final no sea menor al inicial y reajusta las tarifas automáticamente si el cliente devolvió el carro en una fecha diferente a la pactada.
-6. **Reto Adicional (Sección 32):** Se implementó de forma completa el caso de uso `cancelarAlquiler` que permite anular contratos pendientes antes de su inicio, liberando los compromisos sobre el inventario.
+## 💼 Reglas de Negocio y Aduanas Lógicas Implementadas
+
+### 👥 Módulo de Clientes
+1. **Validación Perimetral de Documento (POST):** Durante la creación, el payload captura la identificación como una cadena de texto a través de `CrearClienteDto`, permitiendo que el Servicio evalúe la expresión regular estricta `^[0-9]+$`. Esto detiene tramas corruptas conteniendo letras o guiones (ej. `"179-348625"`) en la frontera, transformando fallos de red en respuestas controladas `400 Bad Request`.
+2. **Consistencia de Correo RFC 5322:** Los emails son validados bajo el patrón internacional RFC 5322, verificando la estructura `usuario@dominio.extension` e impidiendo puntos o arrobas consecutivas.
+3. **Idempotencia Relacional de Cuentas:** Todo correo ingresado en mostrador o actualización es procesado mediante el método `.toLowerCase()`, garantizando que las cuentas se almacenen exclusivamente en minúsculas en H2 para evitar duplicidades semánticas.
+4. **Máquina de Estados Eficiente (Reactivación Automática):** Al consumir el caso de uso `actualizarCliente`, si el cliente consultado se encontraba en estado `INACTIVO`, el sistema actualiza sus datos de contacto y altera de forma transparente su propiedad regresándolo al estado `ACTIVO`.
+
+### 🚗 Módulo de Vehículos (Autos)
+1. **Restricción de Placa Única Relacional:** El esquema físico de la tabla H2 define la columna placa con la propiedad `unique = true`, forzando la unicidad absoluta en el motor de base de datos independientemente del ID autoincremental de la fila.
+2. **Aduana Estructural Vehicular:** Se implementa el patrón de expresiones regulares nativas `^[A-Z]{3}-[0-9]{3}$`, forzando a que toda placa nueva posea la máscara estricta de 3 letras mayúsculas, un guión divisor obligatorio y 3 números.
+3. **Cota Cronológica Temporal:** El año de registro del automóvil debe constar de 4 dígitos exactos y ser estrictamente superior al año 2000.
+4. **Proporcionalidad Financiera en Inventario:** El depósito de garantía exigido en mostrador no puede ser inferior, bajo ninguna circunstancia, al precio de alquiler por día estipulado para el vehículo.
+
+### 📑 Módulo de Alquileres y Reservas
+1. **Muro de Cruce de Fechas:** El sistema inspecciona los registros relacionales en H2 impidiendo transacciones o aperturas de contratos si las fechas solicitadas se cruzan cronológicamente con alguna reserva pendiente o activa previa sobre el mismo automóvil.
+2. **Cierre Contractual Flexible y Rollover:** Al procesar un retorno en mostrador, el sistema recalcula los costos si las fechas reales difieren de las pactadas. Además, mediante la interfaz web se implementa un interruptor de *Rollover* para mitigar desfases matemáticos en caso de que el odómetro físico del carro haya completado su ciclo volviendo a cero.
+3. **Disponibilidad Estricta:** Solo se pueden alquilar vehículos en estado `DISPONIBLE`.
+4. **Flujo de Reservas:** Los contratos cuyas fechas de inicio sean futuras nacen en estado `PENDIENTE` (Reserva), permitiendo que el vehículo siga disponible en el mostrador para uso inmediato en el presente. Al invocar `activarReserva`, el contrato pasa a `ACTIVO` y el auto se bloquea a `ALQUILADO`.
 
 ---
 
-## ⚡ Endpoints Mínimos de la API REST
+## ⚡ Endpoints Estratégicos de la API REST
 
-### Vehículos (Autos)
-* `POST /api/autos` - Registrar un nuevo vehículo (Nace disponible).
-* `PUT /api/autos/mantenimiento` - Ingresar o liberar un vehículo del taller mecánico.
-* `PUT /api/autos/{id}/desactivar` - Eliminación lógica (Dar de baja) a un auto del catálogo.
+### Módulo Clientes
+* `POST /api/clientes` - Alta de clientes blindada (Valida unicidad de identificación y formato de cadenas).
+* `PUT /api/clientes/{id}/actualizar` - Modificación flexible de datos de contacto (Celular / Email) con reactivación automática de estados.
+* `PUT /api/clientes/{id}/desactivar` - Inactivación definitiva (Baja lógica) validando la ausencia de rentas en curso.
+* `GET /api/clientes` - Listar el registro completo de clientes.
+* `GET /api/clientes/{id}` - Consultar un cliente por su ID.
+
+### Módulo Vehículos (Autos)
+* `POST /api/autos` - Inserción en catálogo en estado base `DISPONIBLE` (Aplica Regex de placa y cotas de años).
+* `PUT /api/autos/{id}/tarifas` - Ajuste transaccional de precios diarios y depósitos (Valida que el depósito sea $\ge$ precio por día).
+* `PUT /api/autos/{id}/desactivar` - Desincorporación de flota (Baja lógica).
 * `GET /api/autos` - Listar todos los vehículos.
 * `GET /api/autos/{id}` - Consultar un vehículo por su ID.
 
-### Clientes
-* `POST /api/clientes` - Registrar un cliente (Valida correos y documentos únicos).
-* `PUT /api/clientes/{id}/desactivar` - Dar de baja lógica a un cliente (Inactivación).
-* `GET /api/clientes` - Listar el registro completo de clientes.
-
-### Alquileres / Reservas (Implementación con DTOs)
-* `POST /api/alquileres` - Crear un contrato en estado `PENDIENTE` o `ACTIVO` según la fecha de inicio.
-* `PUT /api/alquileres/{id}/iniciar` - Check-in físico. Activa una reserva pendiente y captura el odómetro actual del carro.
-* `PUT /api/alquileres/{id}/finalizar` - Cierre flexible del contrato. Ejecuta la reliquidación de tiempos y libera el auto.
-* `PUT /api/alquileres/{id}/cancelar` - Cancelación total de un contrato antes de que inicie.
+### Módulo Alquileres
+* `POST /api/alquileres` - Mapeo de contratos celebrados. Si la fecha de inicio es futura nace como `PENDIENTE` (Reserva); si es presente nace `ACTIVO` bloqueando el vehículo en H2 a estado `ALQUILADO`.
+* `PUT /api/alquileres/{id}/iniciar` - Check-in en mostrador de una reserva previa, capturando el millaje real del auto.
+* `PUT /api/alquileres/{id}/finalizar` - Check-out contractual flexible con reliquidación temporal de tiempos financieros.
+* `PUT /api/alquileres/{id}/cancelar` - Anulación total de contratos pendientes liberando los compromisos sobre el inventario.
+* `GET /api/alquileres` - Recupera el listado histórico completo de contratos celebrados (Finalizados, Activos y Pendientes) almacenados en H2.
+* `GET /api/alquileres/{id}` - Consulta la información detallada de un contrato de alquiler específico mediante su ID.
 
 ---
 
@@ -252,6 +277,41 @@ Todos los endpoints de la API manejan datos en formato JSON tanto para las solic
   "id": 1,
   "estado": "CANCELADO"
 }
+```
+
+#### 🔹 Consultar todos los Alquileres
+* **Ruta:** `GET /api/alquileres`
+* **Descripción:** Recupera la lista completa de órdenes contractuales del sistema AutoRent para la sincronización de la grilla del Frontend.
+* **Ejemplo de Respuesta (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "clienteId": 1,
+    "autoId": 1,
+    "fechaReserva": "2026-10-21",
+    "fechaInicio": "2026-11-01",
+    "fechaFin": "2026-11-05",
+    "cantidadDias": 4,
+    "valorTotal": 600000.0,
+    "kilometrajeInicial": 10050.0,
+    "kilometrajeFinal": null,
+    "estado": "ACTIVO"
+  },
+  {
+    "id": 6,
+    "clienteId": 1,
+    "autoId": 6,
+    "fechaReserva": "2026-10-22",
+    "fechaInicio": "2026-11-15",
+    "fechaFin": "2026-11-18",
+    "cantidadDias": 3,
+    "valorTotal": 480000,
+    "kilometrajeInicial": null,
+    "kilometrajeFinal": null,
+    "estado": "PENDIENTE"
+  }
+]
 ```
 
 ---
@@ -556,4 +616,4 @@ Una vez que el servidor web embebido se encuentra en ejecución por medio de cua
 *   **Panel Operativo Frontend de Pruebas:** Si lo desea, puede abrir de manera directa en el navegador Google Chrome el archivo estático ubicado en la ruta del proyecto: `src/main/resources/static/index_v7.html` o ingresando a la ruta [http://localhost:8081/index_v7.html](http://localhost:8081/index_v7.html) para simular las transacciones y peticiones HTTP en tiempo real.
 
 ## Diagrama del proyecto
-<img width="3016" height="5998" alt="pc-autorent-jcoyh ENTREGABLE Diagrama" src="https://github.com/user-attachments/assets/940f79a4-6b6f-4c21-beed-ccc090ffdbdd" />s
+<img width="3016" height="5998" alt="pc-autorent-jcoyh ENTREGABLE Diagrama" src="https://github.com/user-attachments/assets/940f79a4-6b6f-4c21-beed-ccc090ffdbdd" />

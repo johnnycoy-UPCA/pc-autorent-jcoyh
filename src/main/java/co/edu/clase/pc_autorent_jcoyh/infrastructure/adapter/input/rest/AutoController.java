@@ -3,12 +3,14 @@ package co.edu.clase.pc_autorent_jcoyh.infrastructure.adapter.input.rest;
 import co.edu.clase.pc_autorent_jcoyh.application.port.input.RegistrarAutoUseCase;
 import co.edu.clase.pc_autorent_jcoyh.domain.model.Auto;
 import co.edu.clase.pc_autorent_jcoyh.infrastructure.adapter.input.rest.dto.ActualizarMantenimientoDto;
+import co.edu.clase.pc_autorent_jcoyh.infrastructure.adapter.input.rest.dto.ActualizarTarifasAutoDto;
 import co.edu.clase.pc_autorent_jcoyh.infrastructure.adapter.input.rest.dto.CrearAutoDto;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import co.edu.clase.pc_autorent_jcoyh.application.port.input.ActualizarMantenimientoUseCase;
+import co.edu.clase.pc_autorent_jcoyh.application.port.input.ActualizarTarifasAutoUseCase;
 import co.edu.clase.pc_autorent_jcoyh.application.port.input.DarBajaAutoUseCase;
 import co.edu.clase.pc_autorent_jcoyh.application.port.output.AutoRepositoryPort;
 
@@ -22,15 +24,18 @@ public class AutoController {
     private final AutoRepositoryPort autoRepositoryPort;
     private final ActualizarMantenimientoUseCase actualizarMantenimientoUseCase;
     private final DarBajaAutoUseCase darBajaAutoUseCase;
+    private final ActualizarTarifasAutoUseCase actualizarTarifasAutoUseCase;
 
     public AutoController(RegistrarAutoUseCase registrarAutoUseCase, 
                         AutoRepositoryPort autoRepositoryPort,
                         ActualizarMantenimientoUseCase actualizarMantenimientoUseCase,
-                        DarBajaAutoUseCase darBajaAutoUseCase) {
+                        DarBajaAutoUseCase darBajaAutoUseCase,
+                        ActualizarTarifasAutoUseCase actualizarTarifasAutoUseCase) {
         this.registrarAutoUseCase = registrarAutoUseCase;
         this.autoRepositoryPort = autoRepositoryPort;
         this.actualizarMantenimientoUseCase = actualizarMantenimientoUseCase;
         this.darBajaAutoUseCase = darBajaAutoUseCase;
+        this.actualizarTarifasAutoUseCase = actualizarTarifasAutoUseCase;
     }
 
     @PostMapping
@@ -76,6 +81,19 @@ public class AutoController {
         Auto autoDesactivado = darBajaAutoUseCase.darDeBajaAuto(autoId);
         return ResponseEntity
             .ok(autoDesactivado);
+    }
+
+    @PutMapping("/{id}/tarifas")
+    public ResponseEntity<Auto> actualizarTarifas(@PathVariable("id") Long autoId, 
+                                                @RequestBody ActualizarTarifasAutoDto request) {
+
+        Auto autoActualizado = actualizarTarifasAutoUseCase.actualizarTarifasAuto(autoId, 
+                                                                                request.getPrecioPorDia(), 
+                                                                                request.getDeposito()
+        );
+        
+        return ResponseEntity
+            .ok(autoActualizado);
     }
 
     @GetMapping

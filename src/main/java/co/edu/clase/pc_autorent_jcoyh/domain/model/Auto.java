@@ -62,9 +62,15 @@ public class Auto {
     public double getPrecioPorDia() { 
         return precioPorDia; 
     }
+    public void setPrecioPorDia(double precioPorDia) { 
+        this.precioPorDia = precioPorDia; 
+    }
     
     public double getDeposito() { 
         return deposito; 
+    }
+    public void setDeposito(double deposito) { 
+        this.deposito = deposito; 
     }
     
     public Double getKilometraje() { 

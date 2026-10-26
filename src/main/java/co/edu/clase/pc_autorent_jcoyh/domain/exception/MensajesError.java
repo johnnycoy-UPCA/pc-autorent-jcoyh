@@ -13,10 +13,16 @@ public final class MensajesError {
     public static final String AUTO_PLACA_NO_REGISTRADO = "El vehículo con placa %s no se encuentra registrado en el sistema.";
     public static final String AUTO_NO_REGISTRADO = "El vehículo con ID %s no se encuentra registrado en el sistema.";
     public static final String AUTO_NO_KILOMETRAJE = "El registro del kilometraje es obligatorio.";
+    public static final String AUTO_ANIO_INVALIDO = "El año del vehículo debe ser superior a 2000.";
+    public static final String AUTO_PLACA_VACIA = "La placa del vehículo es obligatoria.";
+    public static final String AUTO_PLACA_INVALIDA = "La placa del vehículo no tiene un formato válido.";
+    public static final String AUTO_PRECIO_DIA_INVALIDO = "El precio por día del vehículo debe ser mayor que cero.";
+    public static final String AUTO_DEPOSITO_INVALIDO = "El depósito de garantía ($%.2f) no puede ser inferior al precio de alquiler por día ($%.2f).";
 
-    public static final String CLIENTE_CAMPO_OBLIGATORIO = "Debe diligenciar los campos obligatorios y no pueden estar vacíos.";
-    public static final String CLIENTE_DOCUMENTO_OBLIGATORIO = "Debe ingresar un documento válido.";
+    public static final String CLIENTE_CAMPO_OBLIGATORIO = "Todos los campos son obligatorios.";
+    public static final String CLIENTE_DOCUMENTO_VALIDO = "Debe ingresar un documento válido.";
     public static final String CLIENTE_EMAIL_INVALIDO = "El correo electrónico '%s' no tiene un formato válido.";
+    public static final String CLIENTE_CELULAR_INVALIDO = "El número de teléfono celular no es válido. No debe contener letras, guiones ni espacios.";
     public static final String CLIENTE_DOCUMENTO_REPETIDO = "Ya existe un cliente registrado con el documento %d en el sistema.";
     public static final String CLIENTE_INACTIVO = "El cliente con documento %d se encuentra INACTIVO.";
     public static final String CLIENTE_NO_REGISTRADO = "El cliente con ID %d no se encuentra registrado en el sistema.";

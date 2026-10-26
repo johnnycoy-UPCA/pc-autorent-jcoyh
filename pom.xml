@@ -49,7 +49,7 @@
 			<scope>test</scope>
 		</dependency>
 
-<!-- AÑADIDO PARA PODER EMPLEAR H2 Y HACER CONSULTAS POR JPA -->                
+		<!-- AÑADIDO PARA PODER EMPLEAR H2 Y HACER CONSULTAS POR JPA -->
 
         <!-- Persistencia de Datos: Activa JPA y Hibernate para conectarse a la base de datos -->
 		<dependency>
@@ -64,9 +64,17 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- Consola H2: Permite acceder a la consola de H2 para realizar consultas -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-h2console</artifactId>
+		</dependency>
+
+		<!-- Librería para validación de números de teléfono -->
+		<dependency>
+			<groupId>com.googlecode.libphonenumber</groupId>
+			<artifactId>libphonenumber</artifactId>
+			<version>8.13.52</version> <!-- Usa la versión estable más reciente -->
 		</dependency>
 
 
